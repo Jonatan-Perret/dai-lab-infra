@@ -1,0 +1,14 @@
+# Utiliser l'image officielle Nginx
+FROM nginx:alpine
+
+# Copier le contenu du site web
+COPY www /usr/share/nginx/html
+
+# Copier la configuration personnalisée
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Exposer le port 80
+EXPOSE 80
+
+# Lancer Nginx
+CMD ["nginx", "-g", "daemon off;"]
