@@ -43,3 +43,24 @@ Pour démarrer le serveur web:
 > docker run -d -p 8080:80 my-static-site
 
 Le site web est accessible sur http://localhost:8080
+
+## Docker compose
+
+La configuration de docker-compose se trouve dans le fichier compose.yml.
+
+Il contient uniquement un service, le serveur web-static, qui est configuré pour être atteignable sur le port local 8080.
+
+Afin de pouvoir construire l'image, il faut inclure une section "build". Celle-ci contient une ligne "context", qui définit le répertoire qui contient le fichier dockerfile du container à créer et la ligne "dockerfile" qui indique le nom du fichier dockerfile.
+
+Commande pour créer l'image:
+> docker compose build
+
+Commande pour démarrer l'infrastructure (-d pour lancer en arrière plan)
+> docker compose up -d
+
+Le site web est maintenant accessible sur http://localhost:8080
+
+Commande pour stopper l'infrastructure
+> docker compose down
+
+Toutes ces commandes doivent être exécutées dans le dossier contenant le fichier compose.yml.
