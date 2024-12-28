@@ -1,0 +1,7 @@
+FROM alpine:latest
+RUN apk add --no-cache openjdk21
+WORKDIR /app
+COPY javalin/target/server-1.0-jar-with-dependencies.jar /app/app.jar
+
+EXPOSE 7000
+CMD ["java", "-jar", "app.jar"]
