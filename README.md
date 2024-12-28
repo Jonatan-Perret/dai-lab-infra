@@ -64,3 +64,26 @@ Commande pour stopper l'infrastructure
 > docker compose down
 
 Toutes ces commandes doivent être exécutées dans le dossier contenant le fichier compose.yml.
+
+## HTTP API server
+
+Notre API représente la gestion d'une cave à vin.
+
+Les opérations suivantes sont disponibles :
+ - voir la liste de tous les vins (GET)
+ - voir la liste des vins rouges (GET)
+ - voir la liste des vins blancs (GET)
+ - voir la liste des vins rosés (GET)
+ - créer un nouveau vin (CREATE)
+ - mettre à jour un vin (POST)
+ - mettre à jour la quantité d'un vin(PATCH)
+ - supprimer un vin (DELETE)
+
+La liste des requête pour Hoppscotch se trouve dans le fichier [hoppscotch_test.json](./web-api/hoppscotch_test.json).
+
+Le serveur écoute sur le port 7000.
+
+Pour créer l'exécutable java (depuis le dossier web-api/javalin/):
+> mvn clean package
+
+Le fichier compose.yml a été mis à jour pour inclure notre serveur API. Pour créer puis démarrer l'infrastructure, il faut utiliser les commandes décrites dans le chapitre [Docker compose](#docker-compose).

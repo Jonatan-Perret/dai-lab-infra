@@ -5,3 +5,11 @@ services:
       dockerfile: dockerfile
     ports:
       - "8080:80"
+
+  web-api:
+    build:
+      context: ./web-api/
+      dockerfile: Dockerfile
+    ports:
+      - "7000:7000"
+    restart: always
