@@ -8,14 +8,14 @@ import io.javalin.http.Context;
 
 class WineController {
 
-    // "Database" of users
+    // "Database" of wines
     // Since the server is multi-threaded, we need to use a thread-safe data structure
     // such as ConcurrentHashMap or HashMap
     private final ConcurrentHashMap<Integer, Wine> wines = new ConcurrentHashMap<>();
     private int lastId = 0;
 
     public WineController() {
-        // Add some users to the "database"
+        // Add some wines to the "database"
         wines.put(++lastId, new Wine("Pinot gris", "Les Freres Dutruy", "Blanc", "Valais", 2023, 15.0, 1));
         wines.put(++lastId, new Wine("Bordeaux", "Château Lamothe", "Rouge", "Bordeaux", 2019, 25.0, 20));
         wines.put(++lastId, new Wine("Bordeaux", "Mise de la Baronnie", "Rouge", "Bordeaux", 2018, 30.0, 10));
