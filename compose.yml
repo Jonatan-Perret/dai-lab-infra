@@ -3,13 +3,30 @@ services:
     build:
       context: ./web-static/
       dockerfile: dockerfile
-    ports:
-      - "8080:80"
+    labels:
+      - traefik.http.routers.web-static.rule=Host(`web.dai.heig-vd.ch`)
+    #ports:
+    #  - "8080:80"
+    restart: unless-stopped
 
   web-api:
     build:
       context: ./web-api/
       dockerfile: Dockerfile
+    labels:
+      - traefik.http.routers.web-api.rule=Host(`api.dai.heig-vd.ch`)
+    #ports:
+    #  - "7000:7000"
+    restart: unless-stopped
+
+  treafik:
+    image: traefik:v2.2
+    command:
+      - "--api.insecure=true" # allow insecure connection to traefik dashboard
+      - "--providers.docker" # enable docker provider
+      - "--entrypoints.web.address=:80" # default http port
     ports:
-      - "7000:7000"
-    restart: always
+      - "80:80" # default http port
+      - "8080:8080" # traefik dashboard
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"

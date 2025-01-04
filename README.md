@@ -87,3 +87,32 @@ Pour créer l'exécutable java (depuis le dossier web-api/javalin/):
 > mvn clean package
 
 Le fichier compose.yml a été mis à jour pour inclure notre serveur API. Pour créer puis démarrer l'infrastructure, il faut utiliser les commandes décrites dans le chapitre [Docker compose](#docker-compose).
+
+## Reverse proxy
+### fichier hosts
+Pour accéder aux différents services, il faut ajouter les lignes suivantes dans le fichier hosts:
+> 127.0.0.1 web.dai.heig-vd.ch
+> 127.0.0.1 api.dai.heig-vd.ch
+
+cela permet que notre navigateur redirige les requêtes vers notre machine locale pour les noms de domaines web.dai.heig-vd.ch et api.dai.heig-vd.ch et ainsi que Traefik puisse rediriger les requêtes vers les services correspondants via le nom de domaine dans le header de la requête.
+
+### Traefik
+Traefik est un reverse proxy qui permet de rediriger les requêtes vers les différents services en fonction de leur nom de domaine.
+
+Le fichier docker-compose.yml contient la configuration de Traefik et des services web-static et web-api.
+
+Exemple de configuration pour le service web-static:
+>     labels: 
+>       - "traefik.http.routers.web-static.rule=Host(`web.dai.heig-vd.ch`)"
+
+Exemple de configuration pour le service web-api:
+>     labels:
+>       - "traefik.http.routers.web-api.rule=Host(`api.dai.heig-vd.ch`)"
+
+Le dashboard de Traefik est accessible sur http://localhost:8080
+
+On utilise le "réseau interne" de docker pour que Traefik puisse communiquer avec les services.
+Cela permet de ne pas exposé les ports des services directement sur la machine hôte.
+
+Utilisation du routeur de traefik pour rediriger les requêtes vers les services correspondants.
+
