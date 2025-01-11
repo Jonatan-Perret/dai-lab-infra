@@ -4,9 +4,10 @@ services:
       context: ./web-static/
       dockerfile: dockerfile
     labels:
-      - traefik.http.routers.web-static.rule=Host(`web.dai.heig-vd.ch`)
-    #ports:
-    #  - "8080:80"
+      - "traefik.http.routers.web-static.rule=Host(`web.dai.heig-vd.ch`)"
+      - "traefik.http.services.web-static.loadbalancer.sticky=true"
+    deploy:
+      replicas: 3
     restart: unless-stopped
 
   web-api:
@@ -14,19 +15,27 @@ services:
       context: ./web-api/
       dockerfile: Dockerfile
     labels:
-      - traefik.http.routers.web-api.rule=Host(`api.dai.heig-vd.ch`)
-    #ports:
-    #  - "7000:7000"
+      - "traefik.http.routers.web-api.rule=Host(`api.dai.heig-vd.ch`)"
+      - "traefik.http.services.web-api.loadbalancer.sticky=true"
+    volumes:
+      - "/var/log/traefik:/var/log"
+    deploy:
+      replicas: 3
     restart: unless-stopped
 
-  treafik:
+  traefik:
     image: traefik:v2.2
     command:
-      - "--api.insecure=true" # allow insecure connection to traefik dashboard
-      - "--providers.docker" # enable docker provider
-      - "--entrypoints.web.address=:80" # default http port
+      - "--api.insecure=true" # Allow insecure connection to traefik dashboard
+      - "--providers.docker" # Enable docker provider
+      - "--entrypoints.web.address=:80" # Default HTTP port
+      - "--accesslog=true"  # Enable access logs
+      - "--log.level=DEBUG"  # Log level
+      - "--accesslog.filepath=/var/logs/access.log"  # Specify if you want to log to a file
+      - "--log.filepath=/var/logs/traefik/access.log"  # Specify if you want general logs to be written to a file
     ports:
-      - "80:80" # default http port
-      - "8080:8080" # traefik dashboard
+      - "80:80" # Default HTTP port
+      - "8080:8080" # Traefik dashboard
     volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "/var/run/docker.sock:/var/run/docker.sock" # Required for Traefik to access Docker
+      - "./logs:/var/logs" # Log files
