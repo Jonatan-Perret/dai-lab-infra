@@ -145,7 +145,7 @@ utilisations des replicas
 >       #  - "7000:7000" # Uncomment if external access to this service is required without traefik
 >       restart: unless-stopped
 
-Pour lancer l'infrastructure avec un nombre de serveur différents de ceux définit dans le fichier compose.yml ou pour modifier dynamiquement le nombre de serveurs :
+Pour lancer l'infrastructure avec un nombre de serveurs différents de ceux définit dans le fichier compose.yml ou pour modifier dynamiquement le nombre de serveurs :
 >     docker compose up -d --scale web-api=3 --scale web-static=3
 
 expliquation de la commande:
