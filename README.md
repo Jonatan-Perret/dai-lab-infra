@@ -148,10 +148,19 @@ utilisations des replicas
 Pour lancer l'infrastructure:
 >     docker compose up -d --scale web-api=3 --scale web-static=3
 
+expliquation de la commande:
+- --scale web-api=3 : permet de lancer 3 replicas du service web-api
+- --scale web-static=3 : permet de lancer 3 replicas du service web-static
+
+pour changer le nombre de replicas, il suffit de modifier le nombre après le = et relancer la commande.
+
+exemple pour lancer 5 replicas du service web-api:
+>     docker compose up -d --scale web-api=5 --scale web-static=10
+
 Pour tester l'auto-scaling, il faut utiliser un outil de stress test comme [ab](https://httpd.apache.org/docs/2.4/programs/ab.html)
 
 Commande pour lancer un stress test:
->     ab -n 100000 -c 100 http://web.dai.heig-vd.ch/
+>     ab -n 1000000 -c 1000 http://web.dai.heig-vd.ch/
 
 ### Load balancing entre replicas avec sticky sessions
 Pour le load balancing entre les replicas, nous utilisons Traefik.
