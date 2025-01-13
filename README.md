@@ -91,8 +91,8 @@ Le fichier compose.yml a été mis à jour pour inclure notre serveur API. Pour 
 ## Reverse proxy
 ### fichier hosts
 Pour accéder aux différents services, il faut ajouter les lignes suivantes dans le fichier hosts:
-> 127.0.0.1 web.dai.heig-vd.ch
-> 127.0.0.1 api.dai.heig-vd.ch
+>     127.0.0.1 web.dai.heig-vd.ch
+>     127.0.0.1 api.dai.heig-vd.ch
 
 cela permet que notre navigateur redirige les requêtes vers notre machine locale pour les noms de domaines web.dai.heig-vd.ch et api.dai.heig-vd.ch et ainsi que Traefik puisse rediriger les requêtes vers les services correspondants via le nom de domaine dans le header de la requête.
 
@@ -115,4 +115,77 @@ On utilise le "réseau interne" de docker pour que Traefik puisse communiquer av
 Cela permet de ne pas exposé les ports des services directement sur la machine hôte.
 
 Utilisation du routeur de traefik pour rediriger les requêtes vers les services correspondants.
+
+## Load balancing
+### Auto-scaling
+Pour l'auto-scaling, nous utilisons docker-compose et Traefik.
+
+Le fichier docker-compose.yml contient la configuration de Traefik et des services web-static et web-api.
+
+utilisations des replicas
+>     web-static:
+>       build:
+>           context: ./web-static/
+>           dockerfile: dockerfile
+>       labels:
+>           traefik.http.routers.web-static.rule: Host(`web.dai.heig-vd.ch`)
+>       # auto-scaling
+>       deploy:
+>           replicas: 1 # nombre de réplicas
+>     web-api:
+>       build:
+>           context: ./web-api/
+>           dockerfile: Dockerfile
+>       labels:
+>           traefik.http.routers.web-api.rule: Host(`api.dai.heig-vd.ch`)
+>       # auto-scaling
+>       deploy:
+>           replicas: 3 # nombre de réplicas
+>       #ports:
+>       #  - "7000:7000" # Uncomment if external access to this service is required without traefik
+>       restart: unless-stopped
+
+Pour lancer l'infrastructure avec un nombre de serveurs différents de ceux définit dans le fichier compose.yml ou pour modifier dynamiquement le nombre de serveurs :
+>     docker compose up -d --scale web-api=3 --scale web-static=3
+
+expliquation de la commande:
+- --scale web-api=3 : permet de lancer 3 replicas du service web-api
+- --scale web-static=3 : permet de lancer 3 replicas du service web-static
+
+pour changer le nombre de replicas, il suffit de modifier le nombre après le = et relancer la commande. S'il manque le paramètre pour un des serveurs, il sera pris dans le fichier compose.yml.
+
+exemple pour lancer 5 replicas du service web-api:
+>     docker compose up -d --scale web-api=5 --scale web-static=10
+
+Pour tester l'auto-scaling, il faut utiliser un outil de stress test comme [ab](https://httpd.apache.org/docs/2.4/programs/ab.html)
+
+Commande pour lancer un stress test:
+>     ab -n 1000000 -c 1000 http://web.dai.heig-vd.ch/
+
+### Load balancing entre replicas avec sticky sessions
+Pour le load balancing entre les replicas, nous utilisons Traefik.
+
+Traefik permet de gérer le load balancing entre les replicas des services.
+
+Pour activer les sticky sessions, il faut ajouter la ligne suivante dans la configuration du service:
+
+>     labels:
+>       - "traefik.http.services.web-api.loadbalancer.sticky=true"
+
+### Test le load balancing
+Pour tester le load balancing, il faut activer les logs de Traefik afin de voir les requêtes redirigées vers les différents replicas.
+
+Pour activer les logs, il faut ajouter la ligne suivante dans le fichier docker-compose.yml:
+
+>        command:
+>          - "--accesslog=true"
+>          - "--log.level=DEBUG"
+>          - "--accesslog.filepath=/var/logs/access.log"
+>          - "--log.filepath=/var/logs/traefik/access.log"
+>       volumes:
+>         - ./logs:/var/logs
+
+Pour voir les logs:
+>     tail logs/access.log
+
 
