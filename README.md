@@ -116,7 +116,7 @@ Cela permet de ne pas exposé les ports des services directement sur la machine 
 
 Utilisation du routeur de traefik pour rediriger les requêtes vers les services correspondants.
 
-## Load balancing
+## Load balancing
 ### Auto-scaling
 Pour l'auto-scaling, nous utilisons docker-compose et Traefik.
 
