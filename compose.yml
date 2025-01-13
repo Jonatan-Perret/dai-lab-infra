@@ -16,8 +16,6 @@ services:
     labels:
       - "traefik.http.routers.web-api.rule=Host(`api.dai.heig-vd.ch`)"
       - "traefik.http.services.web-api.loadbalancer.sticky.cookie=true"
-      - "traefik.http.services.web-api.loadbalancer.sticky.cookie.name=api_session"
-      - "traefik.http.services.web-api.loadbalancer.sticky.cookie.httpOnly=true"
     volumes:
       - "/var/log/traefik:/var/log"
     deploy:

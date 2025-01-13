@@ -172,7 +172,7 @@ Pour activer les sticky sessions, il faut ajouter la ligne suivante dans la conf
 >     labels:
 >       - "traefik.http.services.web-api.loadbalancer.sticky=true"
 
-### Test le load balancing
+### Test du load balancing avec sticky sessions
 Pour tester le load balancing, il faut activer les logs de Traefik afin de voir les requêtes redirigées vers les différents replicas.
 
 Pour activer les logs, il faut ajouter la ligne suivante dans le fichier docker-compose.yml:
@@ -187,5 +187,10 @@ Pour activer les logs, il faut ajouter la ligne suivante dans le fichier docker-
 
 Pour voir les logs:
 >     tail logs/access.log
+
+Pour tester les sticky sessions, il faut faire une requête avec un navigateur et vérifier que les requêtes suivantes sont redirigées vers le même replica.
+
+Pour voir les logs de Traefik:
+>     tail -f logs/access.log
 
 
