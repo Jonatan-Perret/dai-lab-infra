@@ -145,14 +145,14 @@ utilisations des replicas
 >       #  - "7000:7000" # Uncomment if external access to this service is required without traefik
 >       restart: unless-stopped
 
-Pour lancer l'infrastructure:
+Pour lancer l'infrastructure avec un nombre de serveur différents de ceux définit dans le fichier compose.yml ou pour modifier dynamiquement le nombre de serveurs :
 >     docker compose up -d --scale web-api=3 --scale web-static=3
 
 expliquation de la commande:
 - --scale web-api=3 : permet de lancer 3 replicas du service web-api
 - --scale web-static=3 : permet de lancer 3 replicas du service web-static
 
-pour changer le nombre de replicas, il suffit de modifier le nombre après le = et relancer la commande.
+pour changer le nombre de replicas, il suffit de modifier le nombre après le = et relancer la commande. S'il manque le paramètre pour un des serveurs, il sera pris dans le fichier compose.yml.
 
 exemple pour lancer 5 replicas du service web-api:
 >     docker compose up -d --scale web-api=5 --scale web-static=10
