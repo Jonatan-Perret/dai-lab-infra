@@ -5,6 +5,8 @@ services:
       dockerfile: dockerfile
     labels:
       - "traefik.http.routers.web-static.rule=Host(`web.dai.heig-vd.ch`)"
+      - "traefik.http.routers.web-static.tls.domains[0].main=web.dai.heig-vd.ch"
+      #- "traefik.http.routers.web-static.middlewares=redirect-to-https"
     deploy:
       replicas: 3
     restart: unless-stopped
@@ -15,6 +17,8 @@ services:
       dockerfile: Dockerfile
     labels:
       - "traefik.http.routers.web-api.rule=Host(`api.dai.heig-vd.ch`)"
+      - "traefik.http.routers.web-api.tls.domains[0].main=api.dai.heig-vd.ch"
+      #- "traefik.http.routers.web-api.middlewares=redirect-to-https"
       - "traefik.http.services.web-api.loadbalancer.sticky.cookie=true"
     volumes:
       - "/var/log/traefik:/var/log"
@@ -24,17 +28,21 @@ services:
 
   traefik:
     image: traefik:v2.2
-    command:
-      - "--api.insecure=true" # Allow insecure connection to traefik dashboard
-      - "--providers.docker" # Enable docker provider
-      - "--entrypoints.web.address=:80" # Default HTTP port
-      - "--accesslog=true"  # Enable access logs
-      - "--log.level=DEBUG"  # Log level
-      - "--accesslog.filepath=/var/logs/access.log"  # Specify if you want to log to a file
-      - "--log.filepath=/var/logs/traefik/access.log"  # Specify if you want general logs to be written to a file
     ports:
       - "80:80" # Default HTTP port
+      - "443:443" # Default HTTPS port
       - "8080:8080" # Traefik dashboard
     volumes:
+      - "./traefik.yaml:/etc/traefik/traefik.yaml" # Traefik configuration file
       - "/var/run/docker.sock:/var/run/docker.sock" # Required for Traefik to access Docker
+      - "./certificates:/etc/ssl/traefik" # SSL certificates
+      - "./tls.yaml:/etc/traefik/tls.yaml" # TLS configuration file
       - "./logs:/var/logs" # Log files
+
+  portainer:
+    image: portainer/portainer
+    ports:
+      - "9000:9000"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./portainer_data:/data"

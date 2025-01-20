@@ -193,4 +193,72 @@ Pour tester les sticky sessions, il faut faire une requête avec un navigateur e
 Pour voir les logs de Traefik:
 >     tail -f logs/access.log
 
+## TLS
+### Génération des certificats
+Pour générer les certificats, nous utilisons [openssl](https://www.openssl.org/).
+
+Pour générer un certificat auto-signé:
+>     openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -days 3650 -nodes -subj "/C=XX/ST=Vaud/L=Yverdon/O=HEIG-VD/OU=DAI/CN=Labo"
+
+### Configuration de Traefik
+Pour activer le TLS, il faut passer à l'utilisation d'un fichier de configuration de traefik.
+
+Pour activer le dashboard : 
+>     api:
+>       dashboard: true
+>       insecure: true
+
+Pour activer le TLS, il faut ajouter la section suivante:
+>     entryPoints:
+>       http:
+>       address: ":80"
+>       https:
+>       address: ":443"
+
+Pour la gestion des certificats, il faut créer un fichier tls.yml et y ajouter:
+>   tls:
+>       stores:
+>           default:
+>               defaultCertificate:
+>                   certFile: /etc/ssl/traefik/cert.pem
+>                   keyFile: /etc/ssl/traefik/key.pem
+>   certificates:
+>       - certFile: /etc/ssl/traefik/cert.pem
+>         keyFile: /etc/ssl/traefik/key.pem
+
+Dans le traefik.yml, il faut ajouter la section suivante:
+>    file:
+>      filename: /etc/traefik/certs/cert.pem
+>    docker:
+>       endpoint: "unix:///var/run/docker.sock"
+>       exposedByDefault: true
+
+Pour activer le TLS sur un service, il faut ajouter la ligne suivante dans la configuration du service, exemple pour le service web-static:
+>     labels:
+>       - "traefik.http.routers.web-static.rule=Host(`web.dai.heig-vd.ch`)"
+
+Dans la configuration de traefik, il faut ajouter la ligne suivante pour activer le TLS:
+>     ports:
+>       - "443:443"
+
+Pour ajouter les fichers de configuration et les certificats de traefik, il faut ajouter la ligne suivante dans la configuration des volumes de traefik:
+>   volumes:
+>      - "./traefik.yaml:/etc/traefik/traefik.yaml"
+>      - "./certificates:/etc/ssl/traefik"
+>      - "./tls.yaml:/etc/traefik/tls.yaml"
+
+
+## Management UI
+### Portainer
+Portainer est un outil de gestion de conteneurs Docker. Il permet de visualiser les conteneurs, les images, les volumes, les réseaux et les stacks.
+
+Pour lancer Portainer, il faut ajouter le service suivant dans le fichier compose.yml:
+>     portainer:
+>       image: portainer/portainer-ce
+>       ports:
+>         - "9000:9000"
+>       volumes:
+>         - /var/run/docker.sock:/var/run/docker.sock
+>         - portainer_data:/data
+
 
