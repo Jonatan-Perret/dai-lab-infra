@@ -283,8 +283,9 @@ Parce que nous créer notre stack via la console, nous n'avons pas accès à tou
 ### Modification de la page web static
 La dernière section de la page web affiche les données de l'API, soit le contenu de la cave à vin.
 
-Le fichier index.html a été adapté.
-Le fichier fetch-data.js a été crée. Il contient la requête vers l'API ainsi qu'une fonction pour formater les données.
+Le fichier index.html a été adapté pour afficher le contenu de la cave à vin. Les fonctionnalités sont le filtrage par type de vin, la possibillité d'ajouter, de modifier ou de supprimer un vin.
+
+Le fichier fetch-data.js a été crée. Il contient les scripts de requête vers l'API et les fonctions pour formater les données.
 
 Un gros défit de cette partie a été d'adapter le docker-compose pour qu'il n'y ait plus d'erreurs de sécurité concernant les requêtes.
 ![erreur dans la page web](./images/acces_error.png)
@@ -321,7 +322,7 @@ web-api:
     volumes:
       - "/var/log/traefik:/var/log"
     deploy:
-      replicas: 3
+      replicas: 1
     restart: unless-stopped
 
 ~~~~
