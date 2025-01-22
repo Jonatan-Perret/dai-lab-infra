@@ -18,3 +18,9 @@ buildNumber.properties
 
 # logs
 logs/
+
+# certificates
+certificates/
+
+# portainer
+portainer_data/
