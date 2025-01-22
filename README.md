@@ -261,4 +261,20 @@ Pour lancer Portainer, il faut ajouter le service suivant dans le fichier compos
 >         - /var/run/docker.sock:/var/run/docker.sock
 >         - portainer_data:/data
 
+Pour utiliser Portainer, il faut se rendre sur http://localhost:9000, créer un compte et se connecter.
 
+
+Sur la page d'accueil, clicker sur Get Started et choisir Docker.
+
+![portainer homepage](./images/portainer_homepage.png)
+
+Sur la homepage, on peut voir notre environnement docker.
+![portainer dashboard](./images/portainer_dashboard.png)
+
+En clickant sur l'environnement, on peut voir les conteneurs, les images, les volumes, les réseaux et les stacks.
+![portainer environnement](./images/portainer_environnement.png)
+
+En clickant sur les conteneurs, on peut voir les détails de chaque conteneur, comme les logs, les images utilisées, les ports exposés, etc.
+![portainer details](./images/portainer_details.png)
+
+Parce que nous créer notre stack via la console, nous n'avons pas accès à toutes les fonctionnalités sur notre stack.
