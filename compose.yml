@@ -16,10 +16,26 @@ services:
       context: ./web-api/
       dockerfile: Dockerfile
     labels:
+      # Configuration du routeur pour le service API
       - "traefik.http.routers.web-api.rule=Host(`api.dai.heig-vd.ch`)"
-      - "traefik.http.routers.web-api.tls.domains[0].main=api.dai.heig-vd.ch"
-      #- "traefik.http.routers.web-api.middlewares=redirect-to-https"
+      - "traefik.http.routers.web-api.entrypoints=http,https"
+      - "traefik.http.routers.web-api.tls=true"
+
+      # Définition d'un middleware dynamique pour CORS
+      - "traefik.http.middlewares.cors.headers.accesscontrolalloworiginlist=https://web.dai.heig-vd.ch"
+      - "traefik.http.middlewares.cors.headers.accesscontrolallowmethods=GET,OPTIONS,PUT"
+      - "traefik.http.middlewares.cors.headers.accesscontrolallowheaders=*"
+      - "traefik.http.middlewares.cors.headers.accessControlExposeHeaders=Content-Length"
+      - "traefik.http.middlewares.cors.headers.accessControlMaxAge=100"
+      - "traefik.http.middlewares.cors.headers.addvaryheader=true"
+
+      # Attachement du middleware CORS au routeur
+      - "traefik.http.routers.web-api.middlewares=cors"
+
+      # Sticky sessions
       - "traefik.http.services.web-api.loadbalancer.sticky.cookie=true"
+      - "traefik.http.services.web-api.loadbalancer.sticky.cookie.name=traefik-sticky-cookie"
+      - "traefik.http.services.web-api.loadbalancer.sticky.cookie.secure=true"
     volumes:
       - "/var/log/traefik:/var/log"
     deploy:
@@ -27,7 +43,7 @@ services:
     restart: unless-stopped
 
   traefik:
-    image: traefik:v2.2
+    image: traefik:v2.10
     ports:
       - "80:80" # Default HTTP port
       - "443:443" # Default HTTPS port
