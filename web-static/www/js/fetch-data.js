@@ -1,10 +1,18 @@
-// Configuration de l'URL de l'API et de l'intervalle en millisecondes
-const apiUrl = 'https://api.dai.heig-vd.ch/api/wines'; // Remplacez par l'URL de votre API
+// Configuration de l'URL de base de l'API
+const apiBaseUrl = 'https://api.dai.heig-vd.ch/api/wines';
 const interval = 5000; // Intervalle de 5 secondes
 
-// Fonction pour récupérer les données de l'API
-async function fetchData() {
+// Fonction pour récupérer les données de l'API en fonction du filtre
+async function fetchData(filter = 'all') {
     try {
+        // Construire l'URL en fonction du filtre
+        let apiUrl = apiBaseUrl;
+        if (filter !== 'all') {
+            // Remplace "rosé" par "rose" pour l'URL
+            const normalizedFilter = filter === 'rosé' ? 'rose' : filter;
+            apiUrl = `${apiBaseUrl}/${normalizedFilter}`;
+        }
+
         const response = await fetch(apiUrl);
 
         if (!response.ok) {
@@ -27,18 +35,15 @@ function updatePageContent(data) {
     if (targetElement) {
         targetElement.innerHTML = ''; // Efface le contenu précédent
 
-        // Crée une structure pour les éléments
         const row = document.createElement('div');
         row.className = 'row';
 
         for (const key in data) {
             const wine = data[key];
 
-            // Crée une colonne pour chaque élément
             const col = document.createElement('div');
             col.className = 'col-md-6';
 
-            // Structure du contenu (basée sur votre exemple)
             col.innerHTML = `
                 <div class="service-item">
                     <h4>${wine.name}</h4>
@@ -53,19 +58,18 @@ function updatePageContent(data) {
                 </div>
             `;
 
-            row.appendChild(col); // Ajoute la colonne à la ligne
+            row.appendChild(col);
         }
 
-        targetElement.appendChild(row); // Ajoute la ligne au conteneur
+        targetElement.appendChild(row);
 
-        // Ajouter les gestionnaires d'événements pour les boutons "Modifier"
         const editButtons = document.querySelectorAll('.btn-edit');
-        editButtons.forEach(button => {
+        editButtons.forEach((button) => {
             button.addEventListener('click', () => {
-                const wineId = button.getAttribute('data-id'); // Assure un accès correct via l'ID en string
+                const wineId = button.getAttribute('data-id');
                 const wine = data[wineId];
                 if (wine) {
-                    openEditForm(wineId, wine); // Ouvre le formulaire d'édition
+                    openEditForm(wineId, wine);
                 } else {
                     console.error(`Vin avec l'ID ${wineId} introuvable.`);
                 }
@@ -76,53 +80,74 @@ function updatePageContent(data) {
     }
 }
 
-// Fonction pour afficher le formulaire d'édition
-function openEditForm(wineId, wineData) {
-    // Crée un formulaire HTML
-    const formHtml = `
-        <form id="edit-form">
-            <h4>Modifier le vin : ${wineData.name}</h4>
-            <label>Nom:</label>
-            <input type="text" name="name" value="${wineData.name}" required>
-            <label>Producteur:</label>
-            <input type="text" name="producer" value="${wineData.producer}" required>
-            <label>Type:</label>
-            <input type="text" name="type" value="${wineData.type}" required>
-            <label>Région:</label>
-            <input type="text" name="region" value="${wineData.region}" required>
-            <label>Millésime:</label>
-            <input type="number" name="vintage" value="${wineData.vintage}" required>
-            <label>Prix (CHF):</label>
-            <input type="number" step="0.01" name="price" value="${wineData.price}" required>
-            <label>Quantité:</label>
-            <input type="number" name="quantity" value="${wineData.quantity}" required>
-            <button type="submit" class="btn btn-success">Enregistrer</button>
-            <button type="button" class="btn btn-secondary" id="cancel-edit">Annuler</button>
-        </form>
-    `;
+// Fonction pour ouvrir la modale d'ajout de vin
+function openAddForm() {
+    const addForm = document.getElementById('add-form');
+    if (!addForm) {
+        console.error('Le formulaire d\'ajout (add-form) est introuvable.');
+        return;
+    }
 
-    // Affiche le formulaire dans une boîte de dialogue ou un modal
-    const modalContainer = document.createElement('div');
-    modalContainer.id = 'edit-modal';
-    modalContainer.innerHTML = formHtml;
-    document.body.appendChild(modalContainer);
+    addForm.reset();
 
-    // Gestion des événements du formulaire
-    const editForm = document.getElementById('edit-form');
-    editForm.addEventListener('submit', async (e) => {
+    const saveButton = document.getElementById('save-new-wine');
+    saveButton.onclick = async (e) => {
         e.preventDefault();
 
-        // Récupère les données du formulaire
+        const formData = new FormData(addForm);
+        const newWineData = {};
+        formData.forEach((value, key) => {
+            newWineData[key] = value;
+        });
+
+        try {
+            const response = await fetch(apiBaseUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newWineData),
+            });
+
+            if (!response.ok) {
+                throw new Error(`Erreur lors de l'ajout: ${response.status}`);
+            }
+
+            alert('Nouveau vin ajouté avec succès');
+            fetchData();
+            $('#add-modal').modal('hide');
+        } catch (error) {
+            console.error('Erreur lors de l\'ajout du vin:', error);
+        }
+    };
+
+    $('#add-modal').modal('show');
+}
+
+// Fonction pour ouvrir la modale d'édition d'un vin
+function openEditForm(wineId, wineData) {
+    const editForm = document.getElementById('edit-form');
+    editForm.elements['name'].value = wineData.name;
+    editForm.elements['producer'].value = wineData.producer;
+    editForm.elements['type'].value = wineData.type;
+    editForm.elements['region'].value = wineData.region;
+    editForm.elements['vintage'].value = wineData.vintage;
+    editForm.elements['price'].value = wineData.price;
+    editForm.elements['quantity'].value = wineData.quantity;
+
+    const saveButton = document.getElementById('save-changes');
+    saveButton.onclick = async (e) => {
+        e.preventDefault();
+
         const formData = new FormData(editForm);
         const updatedData = {};
         formData.forEach((value, key) => {
             updatedData[key] = value;
         });
 
-        // Envoie une requête PUT ou PATCH pour mettre à jour le vin
         try {
-            const response = await fetch(`${apiUrl}/${wineId}`, {
-                method: 'PUT', // Ou 'PATCH', selon votre API
+            const response = await fetch(`${apiBaseUrl}/${wineId}`, {
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -134,19 +159,51 @@ function openEditForm(wineId, wineData) {
             }
 
             alert('Vin mis à jour avec succès');
-            fetchData(); // Recharge les données pour refléter les changements
-            modalContainer.remove(); // Ferme le modal
+            fetchData();
+            $('#edit-modal').modal('hide');
         } catch (error) {
             console.error('Erreur lors de la mise à jour:', error);
         }
-    });
+    };
 
-    // Bouton Annuler
-    document.getElementById('cancel-edit').addEventListener('click', () => {
-        modalContainer.remove();
-    });
+    const deleteButton = document.getElementById('delete-wine');
+    deleteButton.onclick = async () => {
+        if (!confirm(`Êtes-vous sûr de vouloir supprimer le vin "${wineData.name}" ?`)) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`${apiBaseUrl}/${wineId}`, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) {
+                throw new Error(`Erreur lors de la suppression: ${response.status}`);
+            }
+
+            alert('Vin supprimé avec succès');
+            fetchData();
+            $('#edit-modal').modal('hide');
+        } catch (error) {
+            console.error('Erreur lors de la suppression:', error);
+        }
+    };
+
+    $('#edit-modal').modal('show');
 }
 
-// Démarrer les appels périodiques
-setInterval(fetchData, interval);
-fetchData(); // Premier appel immédiat
+// Ajouter un gestionnaire d'événements pour le filtre
+document.getElementById('wine-filter').addEventListener('change', (event) => {
+    const selectedFilter = event.target.value;
+    fetchData(selectedFilter);
+});
+
+// Ajouter un gestionnaire d'événements pour le bouton "Ajouter un vin"
+document.getElementById('add-wine').addEventListener('click', openAddForm);
+
+// Charger les données initiales avec le filtre "tous"
+fetchData();
+setInterval(() => {
+    const currentFilter = document.getElementById('wine-filter').value;
+    fetchData(currentFilter);
+}, interval);

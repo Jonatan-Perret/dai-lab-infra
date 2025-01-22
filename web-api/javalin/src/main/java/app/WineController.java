@@ -15,13 +15,32 @@ class WineController {
     private int lastId = 0;
 
     public WineController() {
-        // Add some wines to the "database"
-        wines.put(++lastId, new Wine("Pinot gris", "Les Freres Dutruy", "Blanc", "Valais", 2023, 15.0, 1));
+        // Add Red Wines
         wines.put(++lastId, new Wine("Bordeaux", "Château Lamothe", "Rouge", "Bordeaux", 2019, 25.0, 20));
         wines.put(++lastId, new Wine("Bordeaux", "Mise de la Baronnie", "Rouge", "Bordeaux", 2018, 30.0, 10));
+        wines.put(++lastId, new Wine("Merlot", "Château Margaux", "Rouge", "Bordeaux", 2020, 35.0, 15));
+        wines.put(++lastId, new Wine("Syrah", "Domaine Jean-Louis Chave", "Rouge", "Rhône", 2021, 40.0, 12));
+        wines.put(++lastId, new Wine("Zinfandel", "Ridge Vineyards", "Rouge", "Californie", 2020, 28.0, 25));
+        wines.put(++lastId, new Wine("Cabernet Sauvignon", "Robert Mondavi", "Rouge", "Napa Valley", 2019, 50.0, 18));
+        wines.put(++lastId, new Wine("Grenache", "Clos Saint Jean", "Rouge", "Rhône", 2020, 32.0, 20));
+
+        // Add White Wines
+        wines.put(++lastId, new Wine("Pinot gris", "Les Freres Dutruy", "Blanc", "Valais", 2023, 15.0, 1));
         wines.put(++lastId, new Wine("Chardonnay", "Les Freres Dutruy", "Blanc", "Valais", 2022, 20.0, 5));
+        wines.put(++lastId, new Wine("Riesling", "Dr. Loosen", "Blanc", "Mosel", 2021, 22.0, 10));
+        wines.put(++lastId, new Wine("Sauvignon Blanc", "Cloudy Bay", "Blanc", "Marlborough", 2022, 25.0, 8));
+        wines.put(++lastId, new Wine("Gewürztraminer", "Zind-Humbrecht", "Blanc", "Alsace", 2021, 30.0, 7));
+        wines.put(++lastId, new Wine("Chenin Blanc", "Domaine Huet", "Blanc", "Loire", 2022, 18.0, 9));
+        wines.put(++lastId, new Wine("Viognier", "Domaine Georges Vernay", "Blanc", "Rhône", 2022, 27.0, 6));
+
+        // Add Rosé Wines
         wines.put(++lastId, new Wine("Rosé", "Les Freres Dutruy", "Rosé", "Valais", 2022, 18.0, 3));
         wines.put(++lastId, new Wine("Oeil de Perdrix", "Caves du Château d’Auvernier", "Rosé", "Neuchâtel", 2021, 22.0, 8));
+        wines.put(++lastId, new Wine("Côtes de Provence Rosé", "Domaines Ott", "Rosé", "Provence", 2021, 26.0, 15));
+        wines.put(++lastId, new Wine("Tavel", "Domaine de la Mordorée", "Rosé", "Rhône", 2022, 22.0, 12));
+        wines.put(++lastId, new Wine("Pinot Noir Rosé", "Domaine Drouhin", "Rosé", "Oregon", 2021, 24.0, 10));
+        wines.put(++lastId, new Wine("Grenache Rosé", "Miraval", "Rosé", "Provence", 2022, 28.0, 8));
+        wines.put(++lastId, new Wine("Cabernet Franc Rosé", "Chinon", "Rosé", "Loire", 2021, 18.0, 20));
     }
 
     public void getAll(Context ctx) {
