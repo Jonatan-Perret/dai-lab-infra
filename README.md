@@ -278,3 +278,55 @@ En clickant sur les conteneurs, on peut voir les détails de chaque conteneur, c
 ![portainer details](./images/portainer_details.png)
 
 Parce que nous créer notre stack via la console, nous n'avons pas accès à toutes les fonctionnalités sur notre stack.
+
+## Integration API - static Web site
+### Modification de la page web static
+La dernière section de la page web affiche les données de l'API, soit le contenu de la cave à vin.
+
+Le fichier index.html a été adapté.
+Le fichier fetch-data.js a été crée. Il contient la requête vers l'API ainsi qu'une fonction pour formater les données.
+
+Un gros défit de cette partie a été d'adapter le docker-compose pour qu'il n'y ait plus d'erreurs de sécurité concernant les requêtes.
+![erreur dans la page web](./images/acces_error.png)
+Lorsque le front-end https://web.dai.heig-vd.ch essaie d'envoyer une requête l'API https://api.dai.heig-vd.ch, le navigateur bloque cette requête par défaut car les domaines sont différents (Cross-Origin).
+Les navigateurs imposent cette restriction pour éviter des attaques comme le Cross-Site Request Forgery (CSRF).
+
+### correction de compose.yml
+~~~~
+web-api:
+    build:
+      context: ./web-api/
+      dockerfile: Dockerfile
+    labels:
+      # Configuration du routeur pour le service API
+      - "traefik.http.routers.web-api.rule=Host(`api.dai.heig-vd.ch`)"
+      - "traefik.http.routers.web-api.entrypoints=http,https"
+      - "traefik.http.routers.web-api.tls=true"
+
+      # Définition d'un middleware dynamique pour CORS
+      - "traefik.http.middlewares.cors.headers.accesscontrolalloworiginlist=https://web.dai.heig-vd.ch"
+      - "traefik.http.middlewares.cors.headers.accesscontrolallowmethods=GET,OPTIONS,PUT"
+      - "traefik.http.middlewares.cors.headers.accesscontrolallowheaders=*"
+      - "traefik.http.middlewares.cors.headers.accessControlExposeHeaders=Content-Length"
+      - "traefik.http.middlewares.cors.headers.accessControlMaxAge=100"
+      - "traefik.http.middlewares.cors.headers.addvaryheader=true"
+
+      # Attachement du middleware CORS au routeur
+      - "traefik.http.routers.web-api.middlewares=cors"
+
+      # Sticky sessions
+      - "traefik.http.services.web-api.loadbalancer.sticky.cookie=true"
+      - "traefik.http.services.web-api.loadbalancer.sticky.cookie.name=traefik-sticky-cookie"
+      - "traefik.http.services.web-api.loadbalancer.sticky.cookie.secure=true"
+    volumes:
+      - "/var/log/traefik:/var/log"
+    deploy:
+      replicas: 3
+    restart: unless-stopped
+
+~~~~
+
+En ajoutant des labels pour Traefik dans docker-compose.yml, nous configurons un middleware qui modifie les réponses HTTP de l'API.
+
+## Conclusion
+Toutes les étapes de ce labo ont pu être réalisée. Cela constitue une très bonne base pour la conception d'une infracture incluant un serveur CRUD.
