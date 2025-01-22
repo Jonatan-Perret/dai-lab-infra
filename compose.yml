@@ -39,7 +39,7 @@ services:
 
       # Définition d'un middleware CORS
       - "traefik.http.middlewares.cors.headers.accesscontrolalloworiginlist=https://web.dai.heig-vd.ch"
-      - "traefik.http.middlewares.cors.headers.accesscontrolallowmethods=GET,OPTIONS,PUT"
+      - "traefik.http.middlewares.cors.headers.accesscontrolallowmethods=GET,OPTIONS,PUT, DELETE, PATCH, POST"
       - "traefik.http.middlewares.cors.headers.accesscontrolallowheaders=*"
       - "traefik.http.middlewares.cors.headers.accessControlExposeHeaders=Content-Length"
       - "traefik.http.middlewares.cors.headers.accessControlMaxAge=100"
@@ -55,7 +55,7 @@ services:
     volumes:
       - "/var/log/traefik:/var/log"
     deploy:
-      replicas: 3
+      replicas: 1
     restart: unless-stopped
 
   traefik:
