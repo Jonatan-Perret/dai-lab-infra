@@ -4,9 +4,17 @@ services:
       context: ./web-static/
       dockerfile: dockerfile
     labels:
+      # Router for HTTP (redirect to HTTPS)
+      - "traefik.http.routers.web-static-http.rule=Host(`web.dai.heig-vd.ch`)"
+      - "traefik.http.routers.web-static-http.entrypoints=http"
+      - "traefik.http.routers.web-static-http.middlewares=redirect-to-https"
+
+      # Router for HTTPS
       - "traefik.http.routers.web-static.rule=Host(`web.dai.heig-vd.ch`)"
-      - "traefik.http.routers.web-static.tls.domains[0].main=web.dai.heig-vd.ch"
-      #- "traefik.http.routers.web-static.middlewares=redirect-to-https"
+      - "traefik.http.routers.web-static.entrypoints=https"
+      - "traefik.http.routers.web-static.tls=true"
+      # Middleware for redirection to HTTPS
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
     deploy:
       replicas: 3
     restart: unless-stopped
@@ -16,12 +24,20 @@ services:
       context: ./web-api/
       dockerfile: Dockerfile
     labels:
-      # Configuration du routeur pour le service API
+      # Router for HTTP (redirect to HTTPS)
+      - "traefik.http.routers.web-api-http.rule=Host(`api.dai.heig-vd.ch`)"
+      - "traefik.http.routers.web-api-http.entrypoints=http"
+      - "traefik.http.routers.web-api-http.middlewares=redirect-to-https"
+
+      # # Router for HTTPS
       - "traefik.http.routers.web-api.rule=Host(`api.dai.heig-vd.ch`)"
-      - "traefik.http.routers.web-api.entrypoints=http,https"
+      - "traefik.http.routers.web-api.entrypoints=https"
       - "traefik.http.routers.web-api.tls=true"
 
-      # Définition d'un middleware dynamique pour CORS
+      # Middleware for redirection to HTTPS
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+
+      # Définition d'un middleware CORS
       - "traefik.http.middlewares.cors.headers.accesscontrolalloworiginlist=https://web.dai.heig-vd.ch"
       - "traefik.http.middlewares.cors.headers.accesscontrolallowmethods=GET,OPTIONS,PUT"
       - "traefik.http.middlewares.cors.headers.accesscontrolallowheaders=*"
