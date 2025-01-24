@@ -329,5 +329,7 @@ web-api:
 
 En ajoutant des labels pour Traefik dans docker-compose.yml, nous configurons un middleware qui modifie les réponses HTTP de l'API.
 
+Il est possible que les résultats de l'API ne s'affichent pas dans la page web la première fois qu'on y accède. Dans ce cas, il faut ouvrir une fois https://api.dai.heig-vd.ch/api/wines et confirmer les choix de sécurité.
+
 ## Conclusion
 Toutes les étapes de ce labo ont pu être réalisée. Cela constitue une très bonne base pour la conception d'une infracture incluant un serveur CRUD.
