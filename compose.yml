@@ -4,9 +4,17 @@ services:
       context: ./web-static/
       dockerfile: dockerfile
     labels:
+      # Router for HTTP (redirect to HTTPS)
+      - "traefik.http.routers.web-static-http.rule=Host(`web.dai.heig-vd.ch`)"
+      - "traefik.http.routers.web-static-http.entrypoints=http"
+      - "traefik.http.routers.web-static-http.middlewares=redirect-to-https"
+
+      # Router for HTTPS
       - "traefik.http.routers.web-static.rule=Host(`web.dai.heig-vd.ch`)"
-      - "traefik.http.routers.web-static.tls.domains[0].main=web.dai.heig-vd.ch"
-      #- "traefik.http.routers.web-static.middlewares=redirect-to-https"
+      - "traefik.http.routers.web-static.entrypoints=https"
+      - "traefik.http.routers.web-static.tls=true"
+      # Middleware for redirection to HTTPS
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
     deploy:
       replicas: 3
     restart: unless-stopped
@@ -16,18 +24,42 @@ services:
       context: ./web-api/
       dockerfile: Dockerfile
     labels:
+      # Router for HTTP (redirect to HTTPS)
+      - "traefik.http.routers.web-api-http.rule=Host(`api.dai.heig-vd.ch`)"
+      - "traefik.http.routers.web-api-http.entrypoints=http"
+      - "traefik.http.routers.web-api-http.middlewares=redirect-to-https"
+
+      # # Router for HTTPS
       - "traefik.http.routers.web-api.rule=Host(`api.dai.heig-vd.ch`)"
-      - "traefik.http.routers.web-api.tls.domains[0].main=api.dai.heig-vd.ch"
-      #- "traefik.http.routers.web-api.middlewares=redirect-to-https"
+      - "traefik.http.routers.web-api.entrypoints=https"
+      - "traefik.http.routers.web-api.tls=true"
+
+      # Middleware for redirection to HTTPS
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+
+      # Définition d'un middleware CORS
+      - "traefik.http.middlewares.cors.headers.accesscontrolalloworiginlist=https://web.dai.heig-vd.ch"
+      - "traefik.http.middlewares.cors.headers.accesscontrolallowmethods=GET,OPTIONS,PUT, DELETE, PATCH, POST"
+      - "traefik.http.middlewares.cors.headers.accesscontrolallowheaders=*"
+      - "traefik.http.middlewares.cors.headers.accessControlExposeHeaders=Content-Length"
+      - "traefik.http.middlewares.cors.headers.accessControlMaxAge=100"
+      - "traefik.http.middlewares.cors.headers.addvaryheader=true"
+
+      # Attachement du middleware CORS au routeur
+      - "traefik.http.routers.web-api.middlewares=cors"
+
+      # Sticky sessions
       - "traefik.http.services.web-api.loadbalancer.sticky.cookie=true"
+      - "traefik.http.services.web-api.loadbalancer.sticky.cookie.name=traefik-sticky-cookie"
+      - "traefik.http.services.web-api.loadbalancer.sticky.cookie.secure=true"
     volumes:
       - "/var/log/traefik:/var/log"
     deploy:
-      replicas: 3
+      replicas: 1
     restart: unless-stopped
 
   traefik:
-    image: traefik:v2.2
+    image: traefik:v2.10
     ports:
       - "80:80" # Default HTTP port
       - "443:443" # Default HTTPS port
